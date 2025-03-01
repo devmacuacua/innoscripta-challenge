@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  padding: 20px;
 }
 
 .App-logo {
@@ -35,4 +36,47 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.news-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.news-card {
+  width: 300px;
+  margin: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.news-card .published-date {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 10px;
+}
+
+.news-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.news-card h2 {
+  font-size: 1.2rem;
+  margin-top: 10px;
+}
+
+.news-card p {
+  font-size: 1rem;
+  margin: 10px 0;
+}
+
+.news-card a {
+  color: #007bff;
+  text-decoration: none;
 }
