@@ -68,9 +68,14 @@ const App: React.FC = () => {
           setSources(uniqueSources);
           setLoading(false);
         })
-        .catch(() => {
-          setError('Error fetching news');
+        .catch((e) => {
           setLoading(false);
+          if (e.status === 429) {
+            setError('Maximum queries exceeded for today, please upgrade plan');
+          }
+          else {
+            setError('Error fetching news');
+          }
         });
     }
   }, [fromDate, toDate, debouncedKeyword]);
