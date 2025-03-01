@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 import { format } from 'date-fns';
+import { useAppDispatch, useAppSelector } from './store/hooks';
+import { updateFilters } from './store/preferencesReducer';
 
 interface NewsArticle {
   source: { name: string };
@@ -26,6 +28,12 @@ const App: React.FC = () => {
   const [sources, setSources] = useState<string[]>([]);
 
   const [debouncedKeyword, setDebouncedKeyword] = useState(keyword);
+  const [autor, setAutor] = useState('')
+
+  const [key, setKey] = useState<string>("1")
+
+  const dispatch = useAppDispatch()
+  const preferencesSelector = useAppSelector((state) => state.preferences)
 
   const formatDate = (date: Date) => {
     const year = date.getFullYear();
@@ -33,6 +41,22 @@ const App: React.FC = () => {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+
+  const initPersonalizedFilters = async () => {
+    const preferencesStr = localStorage.getItem("preferences")
+    if (preferencesStr) {
+      const preferences = JSON.parse(preferencesStr)
+      dispatch(updateFilters({ source: preferences?.source, category: preferences?.category, author: preferences?.autor }))
+      setKey(key + 1)
+    } else {
+      console.log("No preferences found in localStorage")
+    }
+  }
+
+  useEffect(() => {
+    initPersonalizedFilters()
+  }, [])
+
 
   const newsUrl = `https://newsapi.org/v2/everything?q=${keyword}&from=${fromDate}&to=${toDate}&sortBy=popularity&apiKey=${process.env.REACT_APP_API_KEY}`
 
@@ -48,12 +72,17 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const today = new Date();
-    const yesterday = new Date();
+    const previousDay = new Date();
 
-    yesterday.setDate(yesterday.getDate() - 1);
-    const formatedYesterday = formatDate(yesterday);
+    previousDay.setDate(previousDay.getDate() - 7);
+    const formatedYesterday = formatDate(previousDay);
     const formatedToday = formatDate(today);
 
+    if (preferencesSelector) {
+      setAutor(preferencesSelector.author)
+      setCategory(preferencesSelector.category)
+      setSource(preferencesSelector.source)
+    }
     setFromDate(formatedYesterday)
     setToDate(formatedToday)
 
@@ -100,8 +129,14 @@ const App: React.FC = () => {
       filtered = filtered.filter(article => article.source.name === source);
     }
 
-    if (fromDate) {
-      filtered = filtered.filter(article => article.publishedAt.startsWith(fromDate));
+    if (fromDate && toDate) {
+      const startDate = new Date(fromDate);
+      const endDate = new Date(toDate);
+
+      filtered = filtered.filter(article => {
+        const articleDate = new Date(article.publishedAt);
+        return articleDate >= startDate && articleDate <= endDate;
+      });
     }
 
     setArticles(filtered);
@@ -111,8 +146,24 @@ const App: React.FC = () => {
     filterArticles();
   }, [keyword, category, source, fromDate]);
 
+  const handleFavoriteFilterSave = () => {
+    localStorage.setItem("preferences", JSON.stringify({ source, category, autor }))
+    dispatch(updateFilters({ source: source, category: category, author: autor }))
+  }
+
+  const clearFilters = () => {
+    setSource("")
+    setCategory("")
+    setAutor("")
+  }
+  const handleFavoriteFilterReset = () => {
+    localStorage.setItem("preferences", "")
+    dispatch(updateFilters({ source: "", category: "", author: "" }))
+    clearFilters();
+  }
+
   return (
-    <div className="App">
+    <div className="App" id={key}>
       <h1>Innoscripta News Aggregator</h1>
 
       <div className="filters">
@@ -145,6 +196,14 @@ const App: React.FC = () => {
           value={toDate}
           onChange={(e) => setToDate(e.target.value)}
         />
+
+        <button
+          onClick={handleFavoriteFilterSave}
+        >Save as Favorites</button>
+
+        <button
+          onClick={handleFavoriteFilterReset}
+        >Resett Favorite Filters</button>
       </div>
 
       {loading ? (
