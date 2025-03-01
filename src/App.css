@@ -80,3 +80,23 @@
   color: #007bff;
   text-decoration: none;
 }
+
+.filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filters input,
+.filters select {
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.published-date {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 5px;
+}
