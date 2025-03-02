@@ -148,56 +148,75 @@ const App: React.FC = () => {
     <div className="App" id={key}>
       <h1>Innoscripta News Aggregator</h1>
 
-      <div className="filters">
-        <input
-          type="text"
-          placeholder="Search by keyword"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-        />
+      <div className="filters-container">
+        <div className="filters-header">
+          <h3>Search & Filters</h3>
+        </div>
 
-        <input
-          type="date"
-          value={fromDate}
-          onChange={(e) => setFromDate(e.target.value)}
-        />
+        <div className="filters-grid">
+          <div className="filter-item">
+            <label>Search:</label>
+            <input
+              type="text"
+              placeholder="Search by keyword"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
+          </div>
 
-        <input
-          type="date"
-          value={toDate}
-          onChange={(e) => setToDate(e.target.value)}
-        />
-      </div>
-      <div className="filters">
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">All Categories</option>
-          {categories.map(categ => (
-            <option key={categ} value={categ}>{categ}</option>
-          ))}
-        </select>
+          <div className="filter-item">
+            <label>From Date:</label>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+            />
+          </div>
 
-        <select value={author} onChange={(e) => setAuthor(e.target.value)}>
-          <option value="">All Authors</option>
-          {authors.map(author => (
-            <option key={author} value={author}>{author}</option>
-          ))}
-        </select>
+          <div className="filter-item">
+            <label>To Date:</label>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+            />
+          </div>
 
-        <select value={source} onChange={(e) => setSource(e.target.value)}>
-          <option value="">All Sources</option>
-          {sources.map(src => (
-            <option key={src} value={src}>{src}</option>
-          ))}
-        </select>
+          <div className="filter-item">
+            <label>Category:</label>
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              <option value="">All Categories</option>
+              {categories.map(categ => (
+                <option key={categ} value={categ}>{categ}</option>
+              ))}
+            </select>
+          </div>
 
+          <div className="filter-item">
+            <label>Author:</label>
+            <select value={author} onChange={(e) => setAuthor(e.target.value)}>
+              <option value="">All Authors</option>
+              {authors.map(author => (
+                <option key={author} value={author}>{author}</option>
+              ))}
+            </select>
+          </div>
 
-        <button
-          onClick={handleFavoriteFilterSave}
-        >Save as Favorites</button>
+          <div className="filter-item">
+            <label>Source:</label>
+            <select value={source} onChange={(e) => setSource(e.target.value)}>
+              <option value="">All Sources</option>
+              {sources.map(src => (
+                <option key={src} value={src}>{src}</option>
+              ))}
+            </select>
+          </div>
 
-        <button
-          onClick={handleFavoriteFilterReset}
-        >Reset Favorite Filters</button>
+          <div className="filter-actions">
+            <button onClick={handleFavoriteFilterSave}>Save as preferred</button>
+            <button onClick={handleFavoriteFilterReset}>Reset preferences</button>
+          </div>
+        </div>
       </div>
 
       {loading ? (
