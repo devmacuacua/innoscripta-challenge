@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const loading = useAppSelector((state) => state.newsArticles.loading)
   const error = useAppSelector((state) => state.newsArticles.error)
 
-  const [keyword, setKeyword] = useState('today');
+  const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('');
   const [source, setSource] = useState('');
   const [fromDate, setFromDate] = useState('');
@@ -45,6 +45,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     initPersonalizedFilters()
+    setKeyword('today')
   }, [])
 
   const newsApiUrl = getNewsUrl(keyword, fromDate, toDate, process.env.REACT_APP_NEWSAPI_API_KEY);
@@ -82,9 +83,7 @@ const App: React.FC = () => {
       dispatch(fetchNTimesData(nTimesUrl))
       dispatch(fetchGuardianData(guardianapisUrl))
 
-      console.log("------allArticles------", allArticles)
-
-      setArticles(allArticles)
+      filterArticles()
     }
   }, [fromDate, toDate, debouncedKeyword, dispatch]);
 
