@@ -2,51 +2,41 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 import { format } from 'date-fns';
+import { updateFilters } from './store/preferences/preferencesReducer';
+import { getGuardianapisUrl, getNewsUrl, getNTimesUrl } from './api/service/WebServices';
+import { formatDate } from './utils/DateUtils'
+import { fetchNewsApiData, fetchNTimesData, fetchGuardianData } from './store/newsArticles/newsArticlesActions';
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import { updateFilters } from './store/preferencesReducer';
-
-interface NewsArticle {
-  source: { name: string };
-  title: string;
-  description: string;
-  url: string;
-  urlToImage: string;
-  publishedAt: string;
-}
+import { NewsArticle } from './api/model/NewsArticleModel';
 
 const App: React.FC = () => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
-  const [allArticles, setAllArticles] = useState<NewsArticle[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const allArticles = useAppSelector((state) => state.newsArticles.allArticles)
+  const categories = useAppSelector((state) => state.newsArticles.categories)
+  const sources = useAppSelector((state) => state.newsArticles.sources)
+  const authors = useAppSelector((state) => state.newsArticles.authors)
+  const loading = useAppSelector((state) => state.newsArticles.loading)
+  const error = useAppSelector((state) => state.newsArticles.error)
 
   const [keyword, setKeyword] = useState('today');
   const [category, setCategory] = useState('');
   const [source, setSource] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
-  const [sources, setSources] = useState<string[]>([]);
 
   const [debouncedKeyword, setDebouncedKeyword] = useState(keyword);
-  const [autor, setAutor] = useState('')
+  const [author, setAuthor] = useState('')
 
   const [key, setKey] = useState<string>("1")
 
   const dispatch = useAppDispatch()
   const preferencesSelector = useAppSelector((state) => state.preferences)
 
-  const formatDate = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
   const initPersonalizedFilters = async () => {
     const preferencesStr = localStorage.getItem("preferences")
     if (preferencesStr) {
       const preferences = JSON.parse(preferencesStr)
-      dispatch(updateFilters({ source: preferences?.source, category: preferences?.category, author: preferences?.autor }))
+      dispatch(updateFilters({ source: preferences?.source, category: preferences?.category, author: preferences?.author }))
       setKey(key + 1)
     } else {
       console.log("No preferences found in localStorage")
@@ -57,8 +47,9 @@ const App: React.FC = () => {
     initPersonalizedFilters()
   }, [])
 
-
-  const newsUrl = `https://newsapi.org/v2/everything?q=${keyword}&from=${fromDate}&to=${toDate}&sortBy=popularity&apiKey=${process.env.REACT_APP_API_KEY}`
+  const newsApiUrl = getNewsUrl(keyword, fromDate, toDate, process.env.REACT_APP_NEWSAPI_API_KEY);
+  const nTimesUrl = getNTimesUrl(process.env.REACT_APP_NYTIMES_API_KEY);
+  const guardianapisUrl = getGuardianapisUrl(keyword, fromDate, process.env.REACT_APP_GUARDIANAPIS_KEY);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -79,38 +70,26 @@ const App: React.FC = () => {
     const formatedToday = formatDate(today);
 
     if (preferencesSelector) {
-      setAutor(preferencesSelector.author)
+      setAuthor(preferencesSelector.author)
       setCategory(preferencesSelector.category)
       setSource(preferencesSelector.source)
     }
     setFromDate(formatedYesterday)
     setToDate(formatedToday)
 
-    if (keyword) {
-      axios
-        .get(newsUrl)
-        .then((response) => {
-          const articles = response.data.articles;
-          setArticles(articles);
-          setAllArticles(articles);
-          const uniqueSources: string[] = Array.from(new Set(articles.map((article: NewsArticle) => article.source.name)));
-          setSources(uniqueSources);
-          setLoading(false);
-        })
-        .catch((e) => {
-          setLoading(false);
-          if (e.status === 429) {
-            setError('Maximum queries exceeded for today, please upgrade plan');
-          }
-          else {
-            setError('Error fetching news');
-          }
-        });
+    if (keyword && fromDate) {
+      dispatch(fetchNewsApiData(newsApiUrl))
+      dispatch(fetchNTimesData(nTimesUrl))
+      dispatch(fetchGuardianData(guardianapisUrl))
+
+      console.log("------allArticles------", allArticles)
+
+      setArticles(allArticles)
     }
-  }, [fromDate, toDate, debouncedKeyword]);
+  }, [fromDate, toDate, debouncedKeyword, dispatch]);
 
   const filterArticles = () => {
-    let filtered = allArticles;
+    let filtered: NewsArticle[] = allArticles;
 
     if (keyword) {
       filtered = filtered.filter(article =>
@@ -120,13 +99,16 @@ const App: React.FC = () => {
     }
 
     if (category) {
-      filtered = filtered.filter(article =>
-        article.title.toLowerCase().includes(category.toLowerCase())
+      filtered = filtered.filter(article => article.title.toLowerCase().includes(category.toLowerCase())
       );
     }
 
     if (source) {
-      filtered = filtered.filter(article => article.source.name === source);
+      filtered = filtered.filter(article => article.source === source);
+    }
+
+    if (author) {
+      filtered = filtered.filter(article => article.author === author);
     }
 
     if (fromDate && toDate) {
@@ -134,7 +116,7 @@ const App: React.FC = () => {
       const endDate = new Date(toDate);
 
       filtered = filtered.filter(article => {
-        const articleDate = new Date(article.publishedAt);
+        const articleDate = new Date(article.publishedDate);
         return articleDate >= startDate && articleDate <= endDate;
       });
     }
@@ -144,17 +126,17 @@ const App: React.FC = () => {
 
   useEffect(() => {
     filterArticles();
-  }, [keyword, category, source, fromDate]);
+  }, [keyword, category, source, author, fromDate]);
 
   const handleFavoriteFilterSave = () => {
-    localStorage.setItem("preferences", JSON.stringify({ source, category, autor }))
-    dispatch(updateFilters({ source: source, category: category, author: autor }))
+    localStorage.setItem("preferences", JSON.stringify({ source, category, author }))
+    dispatch(updateFilters({ source: source, category: category, author: author }))
   }
 
   const clearFilters = () => {
     setSource("")
     setCategory("")
-    setAutor("")
+    setAuthor("")
   }
   const handleFavoriteFilterReset = () => {
     localStorage.setItem("preferences", "")
@@ -174,17 +156,6 @@ const App: React.FC = () => {
           onChange={(e) => setKeyword(e.target.value)}
         />
 
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">All Categories</option>
-        </select>
-
-        <select value={source} onChange={(e) => setSource(e.target.value)}>
-          <option value="">All Sources</option>
-          {sources.map(src => (
-            <option key={src} value={src}>{src}</option>
-          ))}
-        </select>
-
         <input
           type="date"
           value={fromDate}
@@ -196,6 +167,29 @@ const App: React.FC = () => {
           value={toDate}
           onChange={(e) => setToDate(e.target.value)}
         />
+      </div>
+      <div className="filters">
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <option value="">All Categories</option>
+          {categories.map(categ => (
+            <option key={categ} value={categ}>{categ}</option>
+          ))}
+        </select>
+
+        <select value={author} onChange={(e) => setAuthor(e.target.value)}>
+          <option value="">All Authors</option>
+          {authors.map(author => (
+            <option key={author} value={author}>{author}</option>
+          ))}
+        </select>
+
+        <select value={source} onChange={(e) => setSource(e.target.value)}>
+          <option value="">All Sources</option>
+          {sources.map(src => (
+            <option key={src} value={src}>{src}</option>
+          ))}
+        </select>
+
 
         <button
           onClick={handleFavoriteFilterSave}
@@ -203,7 +197,7 @@ const App: React.FC = () => {
 
         <button
           onClick={handleFavoriteFilterReset}
-        >Resett Favorite Filters</button>
+        >Reset Favorite Filters</button>
       </div>
 
       {loading ? (
@@ -212,15 +206,19 @@ const App: React.FC = () => {
         <p>{error}</p>
       ) : (
         <div className="news-list">
-          {articles.map((article, index) => (
+          {articles?.map((article, index) => (
             <div className="news-card" key={index}>
-              <img src={article.urlToImage} alt={article.title} />
+              <img src={article.image} alt={article.title} />
               <h2>{article.title}</h2>
               <p>{article.description}</p>
               <p className="published-date">
-                Published on: {format(new Date(article.publishedAt), 'MMMM dd, yyyy HH:mm')}
+                Published on: {format(new Date(article.publishedDate), 'MMMM dd, yyyy HH:mm')}
               </p>
-              <p><strong>Source:</strong> {article.source.name}</p>
+              <div>
+                <p ><strong>Author:</strong> {article.author}</p>
+                <p className="credits"><strong>Category:</strong> {article.category}</p>
+                <p className="credits"><strong>Source:</strong> {article.source}</p>
+              </div>
               <a href={article.url} target="_blank" rel="noopener noreferrer">Read more</a>
             </div>
           ))}
