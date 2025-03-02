@@ -7,17 +7,7 @@ import { getGuardianapisUrl, getNewsUrl, getNTimesUrl } from './api/service/WebS
 import { formatDate } from './utils/DateUtils'
 import { fetchNewsApiData, fetchNTimesData, fetchGuardianData } from './store/newsArticles/newsArticlesActions';
 import { useAppDispatch, useAppSelector } from './store/hooks';
-
-interface NewsArticle {
-  source: string;
-  author: string;
-  title: string;
-  description: string;
-  category: string;
-  url: string;
-  image: string;
-  publishedDate: string;
-}
+import { NewsArticle } from './api/model/NewsArticleModel';
 
 const App: React.FC = () => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
@@ -99,7 +89,7 @@ const App: React.FC = () => {
   }, [fromDate, toDate, debouncedKeyword, dispatch]);
 
   const filterArticles = () => {
-    let filtered = allArticles;
+    let filtered: NewsArticle[] = allArticles;
 
     if (keyword) {
       filtered = filtered.filter(article =>
@@ -109,8 +99,7 @@ const App: React.FC = () => {
     }
 
     if (category) {
-      filtered = filtered.filter(article =>
-        article.title.toLowerCase().includes(category.toLowerCase())
+      filtered = filtered.filter(article => article.title.toLowerCase().includes(category.toLowerCase())
       );
     }
 

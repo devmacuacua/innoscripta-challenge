@@ -1,19 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchNewsApiData, fetchNTimesData, fetchGuardianData } from "./newsArticlesActions";
-
-interface Article {
-  source: string;
-  category: string;
-  author: string;
-  title: string;
-  description: string;
-  url: string;
-  image: string;
-  publishedDate: string;
-}
+import { NewsArticle } from "../../api/model/NewsArticleModel";
 
 interface NewsArticlesState {
-  allArticles: Article[];
+  allArticles: NewsArticle[];
   categories: string[];
   authors: string[];
   sources: string[];
@@ -24,7 +14,7 @@ interface NewsArticlesState {
 const initialState: NewsArticlesState = {
   allArticles: [],
   categories: [],
-  authors:[],
+  authors: [],
   sources: [],
   loading: false,
   error: null,
@@ -43,9 +33,9 @@ export const newsArticleslice = createSlice({
     builder.addCase(fetchNewsApiData.fulfilled, (state, action) => {
       state.loading = false
       state.allArticles = [...state.allArticles, ...action.payload]
-      state.categories = Array.from(new Set(state.allArticles.map((article) => article.category)))
-      state.authors = Array.from(new Set(state.allArticles.map((article) => article.author)))
-      state.sources = Array.from(new Set(state.allArticles.map((article) => article.source)))
+      state.categories = Array.from(new Set(state.allArticles.map((article) => article.category).filter((category): category is string => category !== null)))
+      state.authors = Array.from(new Set(state.allArticles.map((article) => article.author).filter((author): author is string => author !== null)))
+      state.sources = Array.from(new Set(state.allArticles.map((article) => article.source).filter((source): source is string => source !== null)))
     })
     builder.addCase(fetchNewsApiData.rejected, (state, action) => {
       state.loading = false
@@ -60,9 +50,9 @@ export const newsArticleslice = createSlice({
     builder.addCase(fetchNTimesData.fulfilled, (state, action) => {
       state.loading = false
       state.allArticles = [...state.allArticles, ...action.payload]
-      state.categories = Array.from(new Set(state.allArticles.map((article) => article.category)))
-      state.authors = Array.from(new Set(state.allArticles.map((article) => article.author)))
-      state.sources = Array.from(new Set(state.allArticles.map((article) => article.source)))
+      state.categories = Array.from(new Set(state.allArticles.map((article) => article.category).filter((category): category is string => category !== null)))
+      state.authors = Array.from(new Set(state.allArticles.map((article) => article.author).filter((author): author is string => author !== null)))
+      state.sources = Array.from(new Set(state.allArticles.map((article) => article.source).filter((source): source is string => source !== null)))
     })
     builder.addCase(fetchNTimesData.rejected, (state, action) => {
       state.loading = false
@@ -77,9 +67,9 @@ export const newsArticleslice = createSlice({
     builder.addCase(fetchGuardianData.fulfilled, (state, action) => {
       state.loading = false
       state.allArticles = [...state.allArticles, ...action.payload]
-      state.categories = Array.from(new Set(state.allArticles.map((article) => article.category)))
-      state.authors = Array.from(new Set(state.allArticles.map((article) => article.author)))
-      state.sources = Array.from(new Set(state.allArticles.map((article) => article.source)))
+      state.categories = Array.from(new Set(state.allArticles.map((article) => article.category).filter((category): category is string => category !== null)))
+      state.authors = Array.from(new Set(state.allArticles.map((article) => article.author).filter((author): author is string => author !== null)))
+      state.sources = Array.from(new Set(state.allArticles.map((article) => article.source).filter((source): source is string => source !== null)))
     })
     builder.addCase(fetchGuardianData.rejected, (state, action) => {
       state.loading = false

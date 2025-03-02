@@ -1,13 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
-import transformNewsArticles from '../../api/dto/NewsArticleDTO'
+import transformArticles from '../../api/dto/DTOTransformersHub'
 
 export const fetchNewsApiData = createAsyncThunk(
   'newsArticles/fetchNewsApiData',
   async (newsApiUrl: string, { rejectWithValue }) => {
     try {
       const response = await axios.get(newsApiUrl)
-      return transformNewsArticles(response.data.articles, 'newsapi')
+      return transformArticles(response.data.articles, 'newsapi')
     } catch (error: any) {
       if (error.response?.status === 429) {
         return rejectWithValue('Maximum queries exceeded for today, please upgrade newsAPI plan')
@@ -22,7 +22,7 @@ export const fetchNTimesData = createAsyncThunk(
   async (nTimesUrl: string, { rejectWithValue }) => {
     try {
       const response = await axios.get(nTimesUrl)
-      return transformNewsArticles(response.data.results, 'nyt')
+      return transformArticles(response.data.results, 'nyt')
     } catch (error: any) {
       if (error.response?.status === 429) {
         return rejectWithValue('Maximum queries exceeded for today, please upgrade NTimesAPI plan')
@@ -37,7 +37,7 @@ export const fetchGuardianData = createAsyncThunk(
   async (guardianapisUrl: string, { rejectWithValue }) => {
     try {
       const response = await axios.get(guardianapisUrl)
-      return transformNewsArticles(response.data.response.results, 'guardian')
+      return transformArticles(response.data.response.results, 'guardian')
     } catch (error: any) {
       if (error.response?.status === 429) {
         return rejectWithValue('Maximum queries exceeded for today, please upgrade Guardian plan')
