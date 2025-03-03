@@ -98,8 +98,7 @@ const App: React.FC = () => {
     }
 
     if (category) {
-      filtered = filtered.filter(article => article.title.toLowerCase().includes(category.toLowerCase())
-      );
+      filtered = filtered.filter(article => article.category === category);
     }
 
     if (source) {
@@ -142,6 +141,10 @@ const App: React.FC = () => {
     dispatch(updateFilters({ source: "", category: "", author: "" }))
     clearFilters();
   }
+
+  useEffect(()=>{
+    console.log("-----articles-----",articles)
+  },[articles])
 
   return (
     <div className="App" id={key}>
