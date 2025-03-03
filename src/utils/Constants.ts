@@ -1,0 +1,1 @@
+export const ntimes_base = 'https://www.nytimes.com/'

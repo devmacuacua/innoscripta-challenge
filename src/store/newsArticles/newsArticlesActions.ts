@@ -23,7 +23,7 @@ export const fetchNTimesData = createAsyncThunk(
   async (nTimesUrl: string, { rejectWithValue }) => {
     try {
       const response = await axios.get(nTimesUrl)
-      return transformArticles(response.data.results, 'nyt')
+      return transformArticles(response.data.response.docs, 'nyt')
     } catch (error: any) {
       if (error.response?.status === 429) {
         console.warn('Maximum queries exceeded for today, please upgrade NTimesAPI plan')

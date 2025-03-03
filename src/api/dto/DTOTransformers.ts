@@ -1,4 +1,5 @@
 import { NewsArticle } from '../model/NewsArticleModel';
+import { ntimes_base } from '../../utils/Constants';
 
 export function transformGuardianArticle(article: any): NewsArticle {
     return {
@@ -16,13 +17,13 @@ export function transformGuardianArticle(article: any): NewsArticle {
 export function transformNytArticle(article: any): NewsArticle {
     return {
         source : article.source || "NYT",
-        author : article.byline || "No Author Provided",
-        title : article.title || "No Title Provided",
+        author : article.byline.original || "No Author Provided",
+        title : article.headline.main || "No Title Provided",
         description : article.abstract || "No description provided",
-        category : article.subsection ? article.subsection : "No Category Provided",
-        url : article.url || null,
-        image : article.multimedia?.[0]?.url || null,
-        publishedDate : article.published_date || null,
+        category : article.subsection_name ? article.subsection_name : "No Category Provided",
+        url : article.web_url || null,
+        image : ntimes_base + article.multimedia?.[0]?.url,
+        publishedDate : article.pub_date || null,
     };
 }
 

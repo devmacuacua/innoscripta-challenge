@@ -48,8 +48,8 @@ const App: React.FC = () => {
   }, [])
 
   const newsApiUrl = getNewsUrl(keyword, fromDate, toDate, process.env.REACT_APP_NEWSAPI_API_KEY);
-  const nTimesUrl = getNTimesUrl(process.env.REACT_APP_NYTIMES_API_KEY);
-  const guardianapisUrl = getGuardianapisUrl(keyword, fromDate, process.env.REACT_APP_GUARDIANAPIS_KEY);
+  const nTimesUrl = getNTimesUrl(keyword, fromDate, toDate, process.env.REACT_APP_NYTIMES_API_KEY);
+  const guardianapisUrl = getGuardianapisUrl(keyword, toDate, fromDate, process.env.REACT_APP_GUARDIANAPIS_KEY);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -88,6 +88,13 @@ const App: React.FC = () => {
 
   const filterArticles = () => {
     let filtered: NewsArticle[] = allArticles;
+
+    if (keyword) {
+      filtered = filtered.filter(article =>
+        article.title?.toLowerCase().includes(keyword?.toLowerCase()) ||
+        article.description?.toLowerCase().includes(keyword?.toLowerCase())
+      );
+    }
 
     if (category) {
       filtered = filtered.filter(article => article.category === category);
