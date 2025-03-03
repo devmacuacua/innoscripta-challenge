@@ -10,7 +10,8 @@ export const fetchNewsApiData = createAsyncThunk(
       return transformArticles(response.data.articles, 'newsapi')
     } catch (error: any) {
       if (error.response?.status === 429) {
-        return rejectWithValue('Maximum queries exceeded for today, please upgrade newsAPI plan')
+        console.warn('Maximum queries exceeded for today, please upgrade newsAPI plan')
+        return []
       }
       return rejectWithValue('Error fetching news api')
     }
@@ -25,7 +26,8 @@ export const fetchNTimesData = createAsyncThunk(
       return transformArticles(response.data.results, 'nyt')
     } catch (error: any) {
       if (error.response?.status === 429) {
-        return rejectWithValue('Maximum queries exceeded for today, please upgrade NTimesAPI plan')
+        console.warn('Maximum queries exceeded for today, please upgrade NTimesAPI plan')
+        return []
       }
       return rejectWithValue('Error fetching NYT news')
     }
@@ -40,7 +42,8 @@ export const fetchGuardianData = createAsyncThunk(
       return transformArticles(response.data.response.results, 'guardian')
     } catch (error: any) {
       if (error.response?.status === 429) {
-        return rejectWithValue('Maximum queries exceeded for today, please upgrade Guardian plan')
+        console.warn('Maximum queries exceeded for today, please upgrade Guardian plan')
+        return []
       }
       return rejectWithValue('Error fetching Guardian news')
     }
