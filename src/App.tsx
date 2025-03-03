@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import './App.css';
 import { format } from 'date-fns';
 import { updateFilters } from './store/preferences/preferencesReducer';
@@ -45,7 +44,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     initPersonalizedFilters()
-    setKeyword('today')
+    setKeyword('news')
   }, [])
 
   const newsApiUrl = getNewsUrl(keyword, fromDate, toDate, process.env.REACT_APP_NEWSAPI_API_KEY);
@@ -90,13 +89,6 @@ const App: React.FC = () => {
   const filterArticles = () => {
     let filtered: NewsArticle[] = allArticles;
 
-    if (keyword) {
-      filtered = filtered.filter(article =>
-        article.title?.toLowerCase().includes(keyword?.toLowerCase()) ||
-        article.description?.toLowerCase().includes(keyword?.toLowerCase())
-      );
-    }
-
     if (category) {
       filtered = filtered.filter(article => article.category === category);
     }
@@ -108,17 +100,6 @@ const App: React.FC = () => {
     if (author) {
       filtered = filtered.filter(article => article.author === author);
     }
-
-    if (fromDate && toDate) {
-      const startDate = new Date(fromDate);
-      const endDate = new Date(toDate);
-
-      filtered = filtered.filter(article => {
-        const articleDate = new Date(article.publishedDate);
-        return articleDate >= startDate && articleDate <= endDate;
-      });
-    }
-
     setArticles(filtered);
   };
 
@@ -142,9 +123,26 @@ const App: React.FC = () => {
     clearFilters();
   }
 
-  useEffect(()=>{
-    console.log("-----articles-----",articles)
-  },[articles])
+  useEffect(() => {
+    const getRandomNewsKeyword = () => {
+      const newsKeywords = [
+        "Politics",
+        "Economy",
+        "Sports",
+        "Technology",
+        "Health",
+        "Entertainment",
+        "Environment",
+        "Science",
+        "World",
+        "Business"
+      ];
+
+      const randomIndex = Math.floor(Math.random() * newsKeywords.length);
+      return newsKeywords[randomIndex];
+    }
+    setKeyword(getRandomNewsKeyword())
+  }, [key, dispatch])
 
   return (
     <div className="App" id={key}>
