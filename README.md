@@ -18,6 +18,7 @@
 
 ## 1. Download the .env file attached to your email and move it into the project directory.
 ## 2. Open your terminal and navigate to the project directory.
-## 3. Run: `docker build -t innoscripta-challenge .`,
-## 4. Run: `docker run -p 3000:3000 innoscripta-challenge`
-## 5. Open the link [http://localhost:3000] to access the app.
+## 3. Run: `npm install`,
+## 4. Run: `docker build -t innoscripta-challenge .`,
+## 5. Run: `docker run -p 3000:3000 innoscripta-challenge`
+## 6. Open the link [http://localhost:3000] to access the app.
