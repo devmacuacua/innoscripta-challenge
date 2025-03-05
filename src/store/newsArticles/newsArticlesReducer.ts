@@ -32,7 +32,12 @@ export const newsArticleslice = createSlice({
     })
     builder.addCase(fetchNewsApiData.fulfilled, (state, action) => {
       state.loading = false
-      state.allArticles = [...state.allArticles, ...action.payload]
+      const articlesMap = new Map();
+      [...state.allArticles, ...action.payload].forEach(article => {
+        articlesMap.set(article.title, article);
+      });
+      state.allArticles = Array.from(articlesMap.values());
+
       state.categories = Array.from(new Set(state.allArticles.map((article) => article.category).filter((category): category is string => category !== null)))
       state.authors = Array.from(new Set(state.allArticles.map((article) => article.author).filter((author): author is string => author !== null)))
       state.sources = Array.from(new Set(state.allArticles.map((article) => article.source).filter((source): source is string => source !== null)))
@@ -49,7 +54,12 @@ export const newsArticleslice = createSlice({
     })
     builder.addCase(fetchNTimesData.fulfilled, (state, action) => {
       state.loading = false
-      state.allArticles = [...state.allArticles, ...action.payload]
+      const articlesMap = new Map();
+      [...state.allArticles, ...action.payload].forEach(article => {
+        articlesMap.set(article.title, article);
+      });
+      state.allArticles = Array.from(articlesMap.values());
+
       state.categories = Array.from(new Set(state.allArticles.map((article) => article.category).filter((category): category is string => category !== null)))
       state.authors = Array.from(new Set(state.allArticles.map((article) => article.author).filter((author): author is string => author !== null)))
       state.sources = Array.from(new Set(state.allArticles.map((article) => article.source).filter((source): source is string => source !== null)))
@@ -66,7 +76,12 @@ export const newsArticleslice = createSlice({
     })
     builder.addCase(fetchGuardianData.fulfilled, (state, action) => {
       state.loading = false
-      state.allArticles = [...state.allArticles, ...action.payload]
+      const articlesMap = new Map();
+      [...state.allArticles, ...action.payload].forEach(article => {
+        articlesMap.set(article.title, article);
+      });
+      state.allArticles = Array.from(articlesMap.values());
+
       state.categories = Array.from(new Set(state.allArticles.map((article) => article.category).filter((category): category is string => category !== null)))
       state.authors = Array.from(new Set(state.allArticles.map((article) => article.author).filter((author): author is string => author !== null)))
       state.sources = Array.from(new Set(state.allArticles.map((article) => article.source).filter((source): source is string => source !== null)))
